@@ -34,7 +34,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "Odapp-Challenge-Mobile"
     },
     "android": {
       "adaptiveIcon": {

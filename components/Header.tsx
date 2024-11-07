@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Link } from 'expo-router';
 import { Button } from 'native-base';
-import { useState } from "react";
-import { Image, Text, View, StyleSheet, Dimensions, Animated, TouchableOpacity, LayoutAnimation, UIManager, Platform } from "react-native";
+import { useEffect, useState } from "react";
+import { Image, Text, View, StyleSheet, Dimensions, Animated, TouchableOpacity, UIManager, Platform } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import colors from "~/colors";
@@ -11,18 +11,46 @@ const { width, height } = Dimensions.get("window");
 
 export const HeaderComponent = () => {
     const [isOpenMenu, setIsOpenMenu] = useState(false);
-    const menuAnim = new Animated.Value(-width * 0.7);
+    const menuAnim = new Animated.Value(0);
+    const backgroundAnim = new Animated.Value(0);
     const animatedMenuTranslateX = menuAnim.interpolate({
-        inputRange: [-width * 0.7, 0],
+        inputRange: [0, 1],
         outputRange: [-width * 0.7, 0]
     });
+
+    useEffect(() => {
+        if (isOpenMenu) {
+            // Iniciar animação de abertura
+            Animated.timing(menuAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+            Animated.timing(backgroundAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+        } else {
+            // Iniciar animação de fechamento
+            Animated.timing(menuAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+            Animated.timing(backgroundAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+        }
+    }, [isOpenMenu]);
 
     if (Platform.OS === 'android') {
         UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
     }
     
     const toggleMenu = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsOpenMenu(!isOpenMenu);
     };
 
@@ -33,7 +61,7 @@ export const HeaderComponent = () => {
                     <Icon style={headerStyle.menuBtnIcon} name="menu" />
                 </Button>
             </View>
-            <View style={[headerStyle.menu, { left: isOpenMenu ? 0 : -width * 0.7 }]}>
+            <Animated.View style={[headerStyle.menu, { left: animatedMenuTranslateX }]}>
                 <View style={headerStyle.closeButtonContainer}>
                     <Button style={headerStyle.btnClose} onPress={toggleMenu}>
                         <Icon name="close" style={headerStyle.close} />
@@ -59,9 +87,9 @@ export const HeaderComponent = () => {
                     <Icon name="person" style={headerStyle.itemIcon}/>
                     <Text style={headerStyle.itemText}>Pacientes</Text>
                 </Link>
-            </View>
-            <TouchableOpacity onPress={toggleMenu} >
-                <Animated.View style={[headerStyle.menuBackground, { display: isOpenMenu ? 'flex' : 'none' }]} />
+            </Animated.View>
+            <TouchableOpacity onPress={toggleMenu}>
+                <Animated.View style={[headerStyle.menuBackground, { opacity: backgroundAnim, display: isOpenMenu? 'flex' : 'none'}]} />
             </TouchableOpacity>
             <Image 
                 style={headerStyle.borderHeader} 
@@ -153,6 +181,7 @@ const headerStyle = StyleSheet.create({
     borderHeader: {
         width: '100%',
         height: width * 0.1, 
+        marginTop: -2,
         zIndex: 1
     },
     menuBackground: {

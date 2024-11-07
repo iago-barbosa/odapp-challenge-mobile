@@ -1,20 +1,37 @@
 /* eslint-disable prettier/prettier */
 import { format } from 'date-fns';
+import { useRouter } from "expo-router";
 import { Button } from "native-base";
-import { useContext, useState } from "react";
-import { View, Text, StyleSheet } from 'react-native';
+import { useContext, useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import colors from "~/colors";
 import { PacienteContexts } from "~/contexts/pacientes_contexts";
 import api from "~/services/api";
 import { PacienteProps } from "~/types";
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Link, useRouter } from "expo-router";
-import colors from "~/colors";
 
 export const PacienteItem = (props: any) => {
     const { paciente } = props;
     const { setSelectedPaciente, setPacientes } = useContext(PacienteContexts);
-    const [isOpen, setOpen] = useState(false);
+    const [isOpen, setOpenInfo] = useState(false);
+    const [heightAnim] = useState(new Animated.Value(0));
+    const [rotateAnim] = useState(new Animated.Value(0))
     const router = useRouter();
+
+    useEffect(() => {
+        Animated.timing(heightAnim, {
+            toValue: isOpen ? 150 : 0,
+            duration: 400,
+            useNativeDriver: false,
+        }).start();
+
+        Animated.timing(rotateAnim, {
+            toValue: isOpen ? 1 : 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    }, [isOpen]);
 
     const editar = (paciente: PacienteProps) => {
         setSelectedPaciente(paciente);
@@ -35,13 +52,20 @@ export const PacienteItem = (props: any) => {
         });
     };
 
+    const rotateInterpolate = rotateAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '180deg'],
+    });
+
     return (
         <View style={pacienteStyle.pacienteItem}>
-            <View style={pacienteStyle.title}>
+            <TouchableOpacity style={pacienteStyle.title} onPress={() => setOpenInfo(!isOpen)}>
                 <Text style={pacienteStyle.textH3}>{paciente.nome}</Text>
-                <Icon style={pacienteStyle.iconPrimary} name="expand-more" />
-            </View>
-            <View>
+                <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
+                    <Icon style={pacienteStyle.iconPrimary} name="expand-more" />
+                </Animated.View>
+            </TouchableOpacity>
+            <Animated.View style={[isOpen ? pacienteStyle.open : pacienteStyle.close, {height: heightAnim}]}>
                 <Text style={pacienteStyle.text}>Idade: {paciente.idade}</Text>
                 <Text style={pacienteStyle.text}>Cidade: {paciente.cidade}</Text>
                 <Text style={pacienteStyle.text}>Estado: {paciente.estado}</Text>
@@ -59,7 +83,7 @@ export const PacienteItem = (props: any) => {
                         <Text style={pacienteStyle.btnText}>Deletar</Text>
                     </Button>
                 </View>
-            </View>
+            </Animated.View>
         </View>
     );
 };
@@ -71,6 +95,13 @@ const pacienteStyle = StyleSheet.create({
         borderRadius: 15,
         paddingVertical: 5,
         paddingHorizontal: 10,
+        zIndex: 2
+    },
+    close: {
+        display: 'none'
+    },
+    open: {
+        display: 'flex'
     },
     title: {
         flexDirection: 'row',

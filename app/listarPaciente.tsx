@@ -10,8 +10,6 @@ export default function ListarPaciente() {
     const { paciente, setPacientes } = useContext(PacienteContexts);
 
     useEffect(() => {
-        console.log('aqqq');
-        console.log(paciente);
         if(paciente.length === 0) {
             api.get('/lista-pacientes').then((res: { data: any; status: any; }) => {
                 const { data, status } = res;
@@ -50,7 +48,4 @@ const pacienteStyle = StyleSheet.create({
         gap: 20
     }
 });
-function setDadosEstado(arg0: { estado: string; pacientes: unknown; color: string; }[]) {
-    throw new Error("Function not implemented.");
-}
 
