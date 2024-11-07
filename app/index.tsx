@@ -120,8 +120,8 @@ export default function HomePage() {
                     backgroundColor: "#ffffff",
                     backgroundGradientFrom: "#ffffff",
                     backgroundGradientTo: "#ffffff",
-                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    color: (opacity = 1) => `rgba(100,149,237, ${opacity})`,
+                    labelColor: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
                     strokeWidth: 2,
                 }}
                 verticalLabelRotation={30}
